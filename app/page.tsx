@@ -27,7 +27,7 @@ export default function Home() {
           type="text"
           value={vrm}
           onChange={(e) => setVrm(e.target.value)}
-          placeholder="e.g. C22 AGN"
+          placeholder="e.g. AB12 CDE"
           className="flex-1 rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-center text-lg font-mono uppercase tracking-widest placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
           maxLength={8}
           autoFocus
