@@ -16,9 +16,9 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center gap-10 py-20">
       <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">MOT History & Fault Analysis</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Know what you're buying</h1>
         <p className="mt-3 text-gray-400">
-          Enter a UK registration plate to see MOT history and common faults for similar vehicles.
+          See the MOT history and likely fault patterns for any UK car — before you hand over your money.
         </p>
       </div>
 
