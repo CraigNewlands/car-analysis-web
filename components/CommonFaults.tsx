@@ -52,14 +52,14 @@ export default function CommonFaults({ report }: { report: VehicleReport }) {
 
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6">
-      <h2 className="mb-1 text-base font-semibold">Common Faults — {report.make} {report.model}</h2>
+      <h2 className="mb-1 text-base font-semibold">Predicted Fault Risks — {report.make} {report.model}</h2>
       <p className="mb-5 text-xs text-gray-500">
-        Based on {pa.sample_size.toLocaleString()} similar vehicles within ±10,000 miles
+        What typically fails on {report.make} {report.model}s at this mileage — based on {pa.sample_size.toLocaleString()} real MOT records
         {pa.pass_rate !== null && ` · ${pa.pass_rate}% pass rate`}
       </p>
 
       {pa.sample_size === 0 ? (
-        <p className="text-sm text-gray-500">No peer data available for this make/model at this mileage.</p>
+        <p className="text-sm text-gray-500">No data available for this make/model at this mileage.</p>
       ) : pa.common_failures.length === 0 ? (
         <p className="text-sm text-gray-500">No failure data available.</p>
       ) : (

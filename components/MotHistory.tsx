@@ -229,7 +229,7 @@ function MotTestRow({ t }: { t: MotTest }) {
 export default function MotHistory({ vehicle }: { report: VehicleReport; vehicle: VehicleDetail }) {
   const tests = vehicle.motTests;
   return (
-    <Section title="MOT History">
+    <Section title="MOT History — What's happened so far">
       <MileageChart tests={tests} />
       <div className="flex flex-col gap-2">
         {tests.map((t) => <MotTestRow key={t.motTestNumber} t={t} />)}
