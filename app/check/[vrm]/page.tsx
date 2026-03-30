@@ -54,7 +54,7 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
           onClick={() => router.push("/")}
           className="self-start rounded-lg border border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
         >
-          ← Check another plate
+          ← Check another car
         </button>
       </div>
     );
@@ -74,7 +74,7 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
         onClick={() => router.push("/")}
         className="self-start rounded-lg border border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
       >
-        ← Check another plate
+        ← Check another car
       </button>
     </div>
   );
