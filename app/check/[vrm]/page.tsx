@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { fetchReport, fetchVehicle } from "@/lib/api";
 import type { VehicleReport, VehicleDetail } from "@/lib/types";
 import type { Mode } from "@/lib/verdict";
@@ -17,6 +18,7 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<Mode>("buyer");
+  const router = useRouter();
 
   useEffect(() => {
     params.then((p) => setVrm(p.vrm));
@@ -43,9 +45,17 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-800 bg-red-950 px-6 py-5 text-red-300">
-        <p className="font-semibold">Could not find this vehicle</p>
-        <p className="mt-1 text-sm">{error}</p>
+      <div className="flex flex-col gap-4">
+        <div className="rounded-lg border border-red-800 bg-red-950 px-6 py-5 text-red-300">
+          <p className="font-semibold">Could not find this vehicle</p>
+          <p className="mt-1 text-sm">{error}</p>
+        </div>
+        <button
+          onClick={() => router.push("/")}
+          className="self-start rounded-lg border border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
+        >
+          ← Check another plate
+        </button>
       </div>
     );
   }
@@ -60,6 +70,12 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
       <VerdictCard verdict={verdict} mode={mode} onModeChange={setMode} />
       <MotHistory report={report} vehicle={vehicle} />
       <CommonFaults report={report} />
+      <button
+        onClick={() => router.push("/")}
+        className="self-start rounded-lg border border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
+      >
+        ← Check another plate
+      </button>
     </div>
   );
 }
