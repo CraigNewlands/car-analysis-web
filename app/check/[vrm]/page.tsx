@@ -3,12 +3,11 @@
 import { useEffect, useState } from "react";
 import { fetchReport, fetchVehicle } from "@/lib/api";
 import type { VehicleReport, VehicleDetail } from "@/lib/types";
-import type { Mode } from "@/lib/verdict";
 import { computeVerdict } from "@/lib/verdict";
-import VehicleCard from "@/components/VehicleCard";
-import VerdictCard from "@/components/VerdictCard";
-import MotHistory from "@/components/MotHistory";
+import HeroCard from "@/components/HeroCard";
+import KnownIssues from "@/components/KnownIssues";
 import CommonFaults from "@/components/CommonFaults";
+import MotHistory from "@/components/MotHistory";
 
 export default function CheckPage({ params }: { params: Promise<{ vrm: string }> }) {
   const [vrm, setVrm] = useState<string | null>(null);
@@ -16,7 +15,6 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
   const [vehicle, setVehicle] = useState<VehicleDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<Mode>("buyer");
 
   useEffect(() => {
     params.then((p) => setVrm(p.vrm));
@@ -56,8 +54,8 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
 
   return (
     <div className="flex flex-col gap-6">
-      <VerdictCard verdict={verdict} mode={mode} onModeChange={setMode} />
-      <VehicleCard report={report} />
+      <HeroCard report={report} verdict={verdict} />
+      <KnownIssues verdict={verdict} />
       <CommonFaults report={report} />
       <MotHistory report={report} vehicle={vehicle} />
     </div>
