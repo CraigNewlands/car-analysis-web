@@ -7,7 +7,7 @@ function motExpiryText(expiry: string | null): { text: string; urgent: boolean }
   if (!expiry) return null;
   const days = Math.ceil((new Date(expiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   if (days <= 0) return { text: "MOT has expired", urgent: true };
-  if (days <= 30) return { text: `MOT expires in ${days} days`, urgent: true };
+  if (days <= 90) return { text: `MOT expires in ${days} days`, urgent: days <= 30 };
   return { text: `MOT valid until ${expiry.slice(0, 10)}`, urgent: false };
 }
 
