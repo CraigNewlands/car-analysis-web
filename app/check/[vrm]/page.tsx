@@ -56,10 +56,10 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
 
   return (
     <div className="flex flex-col gap-6">
-      <VehicleCard report={report} />
       <VerdictCard verdict={verdict} mode={mode} onModeChange={setMode} />
-      <MotHistory report={report} vehicle={vehicle} />
+      <VehicleCard report={report} />
       <CommonFaults report={report} />
+      <MotHistory report={report} vehicle={vehicle} />
     </div>
   );
 }
