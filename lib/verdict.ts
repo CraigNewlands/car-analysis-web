@@ -13,8 +13,8 @@ export interface RecurringAdvisory {
 }
 
 export interface RiskScore {
-  score: number;          // 0–100, higher = more risk
-  label: "Low" | "Medium" | "High";  // used as "{label} risk"
+  score: number;          // 0–100, higher = better
+  label: "Poor" | "Fair" | "Good";
   colour: "green" | "yellow" | "red";
 }
 
@@ -151,12 +151,13 @@ function computeRiskScore(params: {
   if (mileageSuspicious) score += 20;
   if (hasOutstandingRecall) score += 15;
 
-  const clamped = Math.min(Math.round(score), 100);
+  const riskClamped = Math.min(Math.round(score), 100);
+  const clamped = 100 - riskClamped;
 
   return {
     score: clamped,
-    label: clamped >= 60 ? "High" : clamped >= 30 ? "Medium" : "Low",
-    colour: clamped >= 60 ? "red" : clamped >= 30 ? "yellow" : "green",
+    label: clamped >= 70 ? "Good" : clamped >= 40 ? "Fair" : "Poor",
+    colour: clamped >= 70 ? "green" : clamped >= 40 ? "yellow" : "red",
   };
 }
 
@@ -216,9 +217,9 @@ export function computeVerdict(vehicle: VehicleDetail, report: VehicleReport): V
     ? "Mileage inconsistency detected — approach with caution"
     : hasOutstandingRecall
     ? "Outstanding safety recall on this vehicle"
-    : riskScore.label === "High"
+    : riskScore.label === "Poor"
     ? `High risk — ${passes} pass${passes !== 1 ? "es" : ""} from ${totalTests} MOT${totalTests !== 1 ? "s" : ""}`
-    : riskScore.label === "Medium"
+    : riskScore.label === "Fair"
     ? `Some concerns — ${passes} pass${passes !== 1 ? "es" : ""} from ${totalTests} MOT${totalTests !== 1 ? "s" : ""}`
     : `Clean history — ${passes} pass${passes !== 1 ? "es" : ""} from ${totalTests} MOT${totalTests !== 1 ? "s" : ""}`;
 

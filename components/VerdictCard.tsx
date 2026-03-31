@@ -66,7 +66,7 @@ function BuyerSection({ verdict }: { verdict: Verdict }) {
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
-            <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">Buyer risk</p>
+            <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">AutoIntel Score</p>
             <div className="relative group/tooltip">
               <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-gray-600 text-gray-500 text-[9px] font-bold cursor-default select-none">i</span>
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-xs text-gray-300 shadow-lg opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-opacity z-10">
@@ -79,7 +79,7 @@ function BuyerSection({ verdict }: { verdict: Verdict }) {
             rs.colour === "red" ? "text-red-400" :
             rs.colour === "yellow" ? "text-yellow-400" :
             "text-green-400"
-          }`}>{rs.label} risk · {rs.score}/100</span>
+          }`}>{rs.label} · {rs.score}/100</span>
         </div>
         <div className="h-2 w-full rounded-full bg-black/30">
           <div
