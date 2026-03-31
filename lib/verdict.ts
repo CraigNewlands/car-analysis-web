@@ -7,6 +7,12 @@ export interface MileageFlag {
   detail: string;
 }
 
+export interface V5CFlag {
+  type: "recent_change" | "long_ownership" | "change_after_failure" | null;
+  text: string;
+  urgent: boolean;
+}
+
 export interface RecurringAdvisory {
   text: string;
   count: number;
@@ -22,6 +28,7 @@ export interface Verdict {
   // Shared
   overallSummary: string;
   riskScore: RiskScore;
+  v5cFlag: V5CFlag;
 
   // History stats
   totalTests: number;
@@ -161,6 +168,47 @@ function computeRiskScore(params: {
   };
 }
 
+function analyseV5C(lastV5CIssued: string | null, tests: MotTest[]): V5CFlag {
+  if (!lastV5CIssued) return { type: null, text: "", urgent: false };
+
+  const v5cDate = new Date(lastV5CIssued);
+  const daysSinceV5C = Math.floor((Date.now() - v5cDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Check if there was a MOT failure shortly before the V5C was issued (within 60 days)
+  const recentFailBeforeV5C = tests.some((t) => {
+    if (t.testResult !== "FAILED") return false;
+    const testDate = new Date(t.completedDate);
+    const daysBefore = Math.floor((v5cDate.getTime() - testDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysBefore >= 0 && daysBefore <= 60;
+  });
+
+  if (recentFailBeforeV5C && daysSinceV5C < 365) {
+    return {
+      type: "change_after_failure",
+      text: `Logbook changed hands shortly after an MOT failure — the previous owner may have sold to avoid repair costs`,
+      urgent: true,
+    };
+  }
+
+  if (daysSinceV5C < 90) {
+    return {
+      type: "recent_change",
+      text: `V5C issued ${daysSinceV5C} days ago — recent keeper change. Verify the seller isn't flipping the car due to hidden faults`,
+      urgent: true,
+    };
+  }
+
+  if (daysSinceV5C > 1095) {
+    return {
+      type: "long_ownership",
+      text: `V5C suggests the same keeper for ${Math.floor(daysSinceV5C / 365)}+ years — sign of stable, long-term ownership`,
+      urgent: false,
+    };
+  }
+
+  return { type: null, text: "", urgent: false };
+}
+
 function motExpiryDays(expiry: string | null): number | null {
   if (!expiry) return null;
   return Math.ceil((new Date(expiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -177,9 +225,11 @@ export function computeVerdict(vehicle: VehicleDetail, report: VehicleReport): V
   const hasOutstandingRecall = vehicle.hasOutstandingRecall === "Yes";
   const expiryDays = motExpiryDays(report.latest_mot.expiry ?? null);
   const recurringAdvisories = getRecurringAdvisories(tests);
+  const v5cFlag = analyseV5C(report.last_v5c_issued ?? null, tests);
 
   // Red flags for buyers
   const redFlags: string[] = [];
+  if (v5cFlag.urgent) redFlags.push(v5cFlag.text);
   if (mileageFlag.suspicious) redFlags.push(mileageFlag.detail);
   if (hasOutstandingRecall) redFlags.push("Outstanding safety recall — check with manufacturer before buying");
   if (failures > 2) redFlags.push(`Failed MOT ${failures} times — more than average for its age`);
@@ -226,6 +276,7 @@ export function computeVerdict(vehicle: VehicleDetail, report: VehicleReport): V
   return {
     overallSummary,
     riskScore,
+    v5cFlag,
     totalTests,
     passes,
     failures,

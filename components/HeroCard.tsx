@@ -36,10 +36,13 @@ export default function HeroCard({
     rs.colour === "yellow" ? "border-yellow-900" :
     "border-green-900";
 
-  // Combine red flags + mileage tick into a single signal list
+  // Combine red flags + positive signals into a single list
   const signals: { type: "good" | "bad"; text: string }[] = [];
   if (!verdict.mileageFlag.suspicious) {
     signals.push({ type: "good", text: verdict.mileageFlag.detail });
+  }
+  if (verdict.v5cFlag.type === "long_ownership") {
+    signals.push({ type: "good", text: verdict.v5cFlag.text });
   }
   for (const f of verdict.redFlags) {
     signals.push({ type: "bad", text: f });

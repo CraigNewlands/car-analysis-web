@@ -36,6 +36,7 @@ export interface VehicleReport {
   fuel_type: string;
   colour: string;
   mileage: number;
+  last_v5c_issued: string | null;
   latest_mot: LatestMot;
   peer_analysis: PeerAnalysis;
 }
