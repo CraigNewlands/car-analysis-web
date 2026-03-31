@@ -141,14 +141,14 @@ function MileageChart({ tests }: { tests: MotTest[] }) {
         {/* Floating tooltip */}
         {activeGroup && (() => {
           const leftPct = (activeGroup.cx / W) * 100;
-          const alignRight = leftPct > 65;
+          const alignRight = leftPct > 60;
           return (
             <div
-              className="pointer-events-none absolute top-2 z-10 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm shadow-lg min-w-[140px]"
-              style={{
-                [alignRight ? "right" : "left"]: `${alignRight ? 100 - leftPct : leftPct}%`,
-                transform: alignRight ? "translateX(50%)" : "translateX(-50%)",
-              }}
+              className="pointer-events-none absolute top-2 z-10 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm shadow-lg w-36"
+              style={alignRight
+                ? { right: `${100 - leftPct}%` }
+                : { left: `${leftPct}%` }
+              }
             >
               <p className="mb-1.5 text-xs text-gray-500">{activeGroup.date}</p>
               {activeGroup.tests.map((t, i) => (
