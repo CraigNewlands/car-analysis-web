@@ -144,7 +144,7 @@ function MileageChart({ tests }: { tests: MotTest[] }) {
           const alignRight = leftPct > 60;
           return (
             <div
-              className="pointer-events-none absolute top-2 z-10 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm shadow-lg w-36"
+              className="pointer-events-none absolute top-2 z-10 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm shadow-lg w-44"
               style={alignRight
                 ? { right: `${100 - leftPct}%` }
                 : { left: `${leftPct}%` }
