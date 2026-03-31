@@ -86,7 +86,7 @@ function MileageChart({ tests }: { tests: MotTest[] }) {
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
           className="w-full cursor-crosshair"
-          style={{ height: H }}
+          style={{ aspectRatio: `${W} / ${H}` }}
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setActiveGroup(null)}
         >
