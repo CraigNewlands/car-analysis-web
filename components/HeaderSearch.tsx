@@ -27,7 +27,7 @@ export default function HeaderSearch() {
         value={vrm}
         onChange={(e) => setVrm(e.target.value)}
         placeholder="Enter plate"
-        className="w-32 rounded-md border border-gray-700 bg-gray-900 px-3 py-1.5 text-sm font-mono uppercase tracking-widest placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
+        className="w-36 rounded-md border border-gray-700 bg-gray-900 px-3 py-1.5 text-sm font-mono uppercase tracking-wider placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
         maxLength={8}
       />
       <button
