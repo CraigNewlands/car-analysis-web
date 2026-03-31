@@ -3,6 +3,14 @@
 import type { VehicleReport } from "@/lib/types";
 import type { Verdict } from "@/lib/verdict";
 
+function motExpiryText(expiry: string | null): { text: string; urgent: boolean } | null {
+  if (!expiry) return null;
+  const days = Math.ceil((new Date(expiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  if (days <= 0) return { text: "MOT has expired", urgent: true };
+  if (days <= 30) return { text: `MOT expires in ${days} days`, urgent: true };
+  return { text: `MOT valid until ${expiry.slice(0, 10)}`, urgent: false };
+}
+
 export default function HeroCard({
   report,
   verdict,
@@ -11,6 +19,7 @@ export default function HeroCard({
   verdict: Verdict;
 }) {
   const { riskScore: rs } = verdict;
+  const motExpiry = motExpiryText(report.latest_mot.expiry ?? null);
 
   const scoreColour =
     rs.colour === "red" ? "text-red-400" :
@@ -46,6 +55,9 @@ export default function HeroCard({
         <div className="min-w-0">
           <p className="text-lg font-semibold truncate">{report.make} {report.model}</p>
           <p className="text-sm text-gray-400">{report.year} · {report.colour} · {report.fuel_type} · {report.mileage.toLocaleString()} mi</p>
+          {motExpiry && (
+            <p className={`text-xs mt-0.5 ${motExpiry.urgent ? "text-red-400" : "text-gray-500"}`}>{motExpiry.text}</p>
+          )}
         </div>
       </div>
 
