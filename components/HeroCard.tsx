@@ -63,7 +63,7 @@ export default function HeroCard({
           )}
           {verdict.taxStatus && (
             <p className={`text-xs mt-0.5 ${verdict.taxStatus === "Taxed" ? "text-gray-500" : "text-red-400"}`}>
-              Tax: {verdict.taxStatus}{verdict.taxDueDate && verdict.taxStatus === "Taxed" ? ` until ${verdict.taxDueDate.slice(0, 7)}` : ""}
+              Tax: {verdict.taxStatus}{verdict.taxDueDate && verdict.taxStatus === "Taxed" ? ` until ${verdict.taxDueDate.slice(0, 10)}` : ""}
             </p>
           )}
         </div>
