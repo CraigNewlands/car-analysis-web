@@ -61,6 +61,18 @@ export default function HeroCard({
           {motExpiry && (
             <p className={`text-xs mt-0.5 ${motExpiry.urgent ? "text-red-400" : "text-gray-500"}`}>{motExpiry.text}</p>
           )}
+          <div className="flex flex-wrap gap-x-3 mt-0.5">
+            {verdict.taxStatus && (
+              <p className={`text-xs ${verdict.taxStatus === "Taxed" ? "text-gray-500" : "text-red-400"}`}>
+                Tax: {verdict.taxStatus}{verdict.taxDueDate && verdict.taxStatus === "Taxed" ? ` until ${verdict.taxDueDate.slice(0, 7)}` : ""}
+              </p>
+            )}
+            {verdict.previousKeepers !== null && (
+              <p className="text-xs text-gray-500">
+                {verdict.previousKeepers} previous keeper{verdict.previousKeepers !== 1 ? "s" : ""}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

@@ -41,6 +41,9 @@ export interface Verdict {
   // Buyer-specific
   redFlags: string[];
   currentAdvisories: string[];
+  previousKeepers: number | null;
+  taxStatus: string | null;
+  taxDueDate: string | null;
 
   // Owner-specific
   recurringAdvisories: RecurringAdvisory[];
@@ -237,6 +240,12 @@ export function computeVerdict(vehicle: VehicleDetail, report: VehicleReport): V
   if (recurringAdvisories.length > 0) {
     redFlags.push(`${recurringAdvisories.length} unresolved advisor${recurringAdvisories.length > 1 ? "ies" : "y"} still present from previous MOTs — not been fixed`);
   }
+  if (report.tax_status && report.tax_status !== "Taxed") {
+    redFlags.push(`Vehicle is ${report.tax_status.toLowerCase()} — ensure tax is paid before driving`);
+  }
+  if (report.previous_keepers !== null && report.previous_keepers !== undefined && report.previous_keepers >= 4) {
+    redFlags.push(`${report.previous_keepers} previous keeper${report.previous_keepers !== 1 ? "s" : ""} — high turnover can indicate recurring problems`);
+  }
 
   // Current advisories on the car right now (from the most recent MOT)
   const sortedTests = [...tests].sort((a, b) => a.completedDate.localeCompare(b.completedDate));
@@ -288,5 +297,8 @@ export function computeVerdict(vehicle: VehicleDetail, report: VehicleReport): V
     recurringAdvisories,
     upcomingRisks,
     currentAdvisoryCount: currentAdvisories.length,
+    previousKeepers: report.previous_keepers ?? null,
+    taxStatus: report.tax_status ?? null,
+    taxDueDate: report.tax_due_date ?? null,
   };
 }

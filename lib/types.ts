@@ -37,6 +37,9 @@ export interface VehicleReport {
   colour: string;
   mileage: number;
   last_v5c_issued: string | null;
+  previous_keepers: number | null;
+  tax_status: string | null;
+  tax_due_date: string | null;
   latest_mot: LatestMot;
   peer_analysis: PeerAnalysis;
 }
