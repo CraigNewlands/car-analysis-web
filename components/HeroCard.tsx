@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { VehicleReport } from "@/lib/types";
 import type { Verdict } from "@/lib/verdict";
+import { isCarSaved, saveCar, removeCar } from "@/lib/savedCars";
 
 function motExpiryText(expiry: string | null): { text: string; urgent: boolean } | null {
   if (!expiry) return null;
@@ -20,6 +22,27 @@ export default function HeroCard({
 }) {
   const { riskScore: rs } = verdict;
   const motExpiry = motExpiryText(report.latest_mot.expiry ?? null);
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { setSaved(isCarSaved(report.registration)); }, [report.registration]);
+
+  function toggleSave() {
+    if (saved) {
+      removeCar(report.registration);
+      setSaved(false);
+    } else {
+      saveCar({
+        registration: report.registration,
+        make: report.make,
+        model: report.model,
+        year: report.year,
+        savedAt: new Date().toISOString(),
+        score: rs.score,
+        scoreLabel: rs.label,
+        scoreColour: rs.colour,
+      });
+      setSaved(true);
+    }
+  }
 
   const scoreColour =
     rs.colour === "red" ? "text-red-400" :
@@ -81,6 +104,16 @@ export default function HeroCard({
           <div className={`h-2.5 rounded-full ${barColour} transition-all`} style={{ width: `${rs.score}%` }} />
         </div>
         <p className="mt-2 text-sm text-gray-300">{verdict.overallSummary}</p>
+        <button
+          onClick={toggleSave}
+          className={`mt-3 text-xs font-medium px-3 py-1.5 rounded-md border transition-colors ${
+            saved
+              ? "border-yellow-600 bg-yellow-950 text-yellow-400 hover:bg-yellow-900"
+              : "border-gray-700 bg-gray-800 text-gray-400 hover:text-gray-200 hover:border-gray-600"
+          }`}
+        >
+          {saved ? "✓ Saved to garage" : "Save to garage"}
+        </button>
       </div>
 
       {/* Signals */}

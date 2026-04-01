@@ -14,7 +14,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-gray-950 text-gray-100 antialiased">
         <header className="border-b border-gray-800 px-6 py-4 flex items-center justify-between gap-4">
           <Link href="/" className="text-lg font-semibold tracking-tight hover:text-yellow-400 transition-colors">AutoIntel</Link>
-          <HeaderSearch />
+          <div className="flex items-center gap-4 flex-1">
+            <Link href="/garage" className="text-sm text-gray-400 hover:text-gray-200 transition-colors">Garage</Link>
+            <div className="flex-1"><HeaderSearch /></div>
+          </div>
         </header>
         <main className="mx-auto max-w-3xl px-6 py-10">{children}</main>
       </body>
