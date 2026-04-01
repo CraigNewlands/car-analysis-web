@@ -49,21 +49,17 @@ export default function GaragePage() {
 
             return (
               <div key={car.registration} className={`rounded-xl border ${borderColour} bg-gray-900 px-5 py-4 flex items-center gap-4`}>
-                <div className="rounded-md border-2 border-yellow-400 bg-yellow-400 px-2.5 py-1 font-mono text-sm font-black tracking-widest text-gray-950 shrink-0">
-                  {car.registration}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate">{car.make} {car.model}</p>
-                  <p className="text-xs text-gray-400">{car.year}</p>
-                </div>
-                <span className={`text-sm font-bold shrink-0 ${scoreColour}`}>
-                  {car.scoreLabel} · {car.score}/100
-                </span>
-                <Link
-                  href={`/check/${car.registration}`}
-                  className="text-xs text-gray-400 hover:text-gray-200 shrink-0"
-                >
-                  Check again →
+                <Link href={`/check/${car.registration}`} className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="rounded-md border-2 border-yellow-400 bg-yellow-400 px-2.5 py-1 font-mono text-sm font-black tracking-widest text-gray-950 shrink-0">
+                    {car.registration}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate">{car.make} {car.model}</p>
+                    <p className="text-xs text-gray-400">{car.year}</p>
+                  </div>
+                  <span className={`text-sm font-bold shrink-0 ${scoreColour}`}>
+                    {car.scoreLabel} · {car.score}/100
+                  </span>
                 </Link>
                 <button
                   onClick={() => handleRemove(car.registration)}
