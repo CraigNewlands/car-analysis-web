@@ -8,6 +8,7 @@ import HeroCard from "@/components/HeroCard";
 import KnownIssues from "@/components/KnownIssues";
 import CommonFaults from "@/components/CommonFaults";
 import MotHistory from "@/components/MotHistory";
+import PriceInput from "@/components/PriceInput";
 
 export default function CheckPage({ params }: { params: Promise<{ vrm: string }> }) {
   const [vrm, setVrm] = useState<string | null>(null);
@@ -55,6 +56,7 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
   return (
     <div className="flex flex-col gap-6">
       <HeroCard report={report} verdict={verdict} />
+      <PriceInput report={report} />
       <KnownIssues verdict={verdict} />
       <CommonFaults report={report} />
       <MotHistory report={report} vehicle={vehicle} />

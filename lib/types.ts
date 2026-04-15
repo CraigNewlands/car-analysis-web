@@ -54,6 +54,15 @@ export interface MotTest {
   defects: Defect[];
 }
 
+export interface PriceSubmission {
+  registration: string;
+  asking_price: number;
+  make?: string;
+  model?: string;
+  year?: number;
+  mileage?: number;
+}
+
 export interface VehicleDetail {
   registration: string;
   make: string;
