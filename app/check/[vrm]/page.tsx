@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchReport, fetchVehicle } from "@/lib/api";
+import { useSearchParams } from "next/navigation";
+import { fetchReport, fetchVehicle, submitPrice } from "@/lib/api";
 import type { VehicleReport, VehicleDetail } from "@/lib/types";
 import { computeVerdict } from "@/lib/verdict";
 import HeroCard from "@/components/HeroCard";
 import KnownIssues from "@/components/KnownIssues";
 import CommonFaults from "@/components/CommonFaults";
 import MotHistory from "@/components/MotHistory";
-import PriceInput from "@/components/PriceInput";
 
 export default function CheckPage({ params }: { params: Promise<{ vrm: string }> }) {
   const [vrm, setVrm] = useState<string | null>(null);
@@ -16,6 +16,7 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
   const [vehicle, setVehicle] = useState<VehicleDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     params.then((p) => setVrm(p.vrm));
@@ -26,7 +27,21 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
     setLoading(true);
     setError(null);
     Promise.all([fetchReport(vrm), fetchVehicle(vrm)])
-      .then(([r, v]) => { setReport(r); setVehicle(v); })
+      .then(([r, v]) => {
+        setReport(r);
+        setVehicle(v);
+        const price = parseInt(searchParams.get("price") ?? "", 10);
+        if (price > 0) {
+          submitPrice({
+            registration: r.registration,
+            asking_price: price,
+            make: r.make,
+            model: r.model,
+            year: parseInt(r.year),
+            mileage: r.mileage,
+          });
+        }
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [vrm]);
@@ -56,7 +71,6 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
   return (
     <div className="flex flex-col gap-6">
       <HeroCard report={report} verdict={verdict} />
-      <PriceInput report={report} />
       <KnownIssues verdict={verdict} />
       <CommonFaults report={report} />
       <MotHistory report={report} vehicle={vehicle} />
