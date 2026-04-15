@@ -30,8 +30,9 @@ export default function CheckPage({ params }: { params: Promise<{ vrm: string }>
       .then(([r, v]) => {
         setReport(r);
         setVehicle(v);
-        const price = parseInt(searchParams.get("price") ?? "", 10);
-        if (price > 0) {
+        const rawPrice = searchParams.get("price") ?? "";
+        const price = /^\d{1,6}$/.test(rawPrice) ? parseInt(rawPrice, 10) : 0;
+        if (price > 0 && price < 500_000) {
           submitPrice({
             registration: r.registration,
             asking_price: price,
