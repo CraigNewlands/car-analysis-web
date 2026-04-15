@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen bg-gray-950 text-gray-100 antialiased">
         <header className="border-b border-gray-800 px-6 py-4 flex items-center justify-between gap-4">
-          <Link href="/" className="text-lg font-semibold tracking-tight hover:text-yellow-400 transition-colors">AutoIntel</Link>
+          <Link href="/" className="flex items-center">
+            <Image src="/icon.png" alt="AutoIntel" width={36} height={36} className="rounded-lg" />
+          </Link>
           <Link href="/garage" className="text-sm text-gray-400 hover:text-gray-200 transition-colors">Garage</Link>
         </header>
         <main className="mx-auto max-w-3xl px-6 py-10">{children}</main>
