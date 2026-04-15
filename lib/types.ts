@@ -39,6 +39,7 @@ export interface VehicleReport {
   last_v5c_issued: string | null;
   tax_status: string | null;
   tax_due_date: string | null;
+  avg_mileage_for_age: number | null;
   latest_mot: LatestMot;
   peer_analysis: PeerAnalysis;
 }

@@ -19,7 +19,7 @@ interface DateGroup {
   tests: TestPoint[];   // all tests on this date (could be fail + pass)
 }
 
-function MileageChart({ tests }: { tests: MotTest[] }) {
+function MileageChart({ tests, avgMileage }: { tests: MotTest[]; avgMileage: number | null }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [activeGroup, setActiveGroup] = useState<DateGroup | null>(null);
 
@@ -59,6 +59,9 @@ function MileageChart({ tests }: { tests: MotTest[] }) {
     })
     .join(" ");
 
+  // Horizontal reference line at average mileage for similar cars at this age
+  const avgY = avgMileage !== null && avgMileage <= maxM ? y(avgMileage) : null;
+
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map((frac) => ({
     label: Math.round(maxM * frac) >= 1000 ? `${Math.round(maxM * frac / 1000)}k` : String(Math.round(maxM * frac)),
     yPos: PAD.top + innerH - frac * innerH,
@@ -80,7 +83,15 @@ function MileageChart({ tests }: { tests: MotTest[] }) {
 
   return (
     <div className="mb-6">
-      <p className="mb-2 text-xs text-gray-500 uppercase tracking-wide">Mileage over time</p>
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-xs text-gray-500 uppercase tracking-wide">Mileage over time</p>
+        {avgY !== null && (
+          <p className="text-xs text-gray-500 flex items-center gap-1.5">
+            <svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#6b7280" strokeWidth="1.5" strokeDasharray="4 3" /></svg>
+            Avg for similar cars ({(avgMileage! / 1000).toFixed(0)}k mi)
+          </p>
+        )}
+      </div>
       <div className="relative">
         <svg
           ref={svgRef}
@@ -105,6 +116,11 @@ function MileageChart({ tests }: { tests: MotTest[] }) {
               y1={PAD.top} y2={H - PAD.bottom}
               stroke="#facc15" strokeWidth={1} strokeDasharray="3 3" opacity={0.5}
             />
+          )}
+
+          {/* Average mileage reference line */}
+          {avgY !== null && (
+            <line x1={PAD.left} x2={W - PAD.right} y1={avgY} y2={avgY} stroke="#6b7280" strokeWidth={1.5} strokeDasharray="4 3" opacity={0.6} />
           )}
 
           {/* Line */}
@@ -226,11 +242,11 @@ function MotTestRow({ t }: { t: MotTest }) {
   );
 }
 
-export default function MotHistory({ vehicle }: { report: VehicleReport; vehicle: VehicleDetail }) {
+export default function MotHistory({ report, vehicle }: { report: VehicleReport; vehicle: VehicleDetail }) {
   const tests = vehicle.motTests;
   return (
     <Section title="MOT History — What's happened so far">
-      <MileageChart tests={tests} />
+      <MileageChart tests={tests} avgMileage={report.avg_mileage_for_age} />
       <div className="flex flex-col gap-2">
         {tests.map((t) => <MotTestRow key={t.motTestNumber} t={t} />)}
       </div>
