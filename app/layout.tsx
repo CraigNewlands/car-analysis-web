@@ -5,6 +5,22 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "AutoIntel",
   description: "See the MOT history and likely fault patterns for any UK car — before you hand over your money.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
+  openGraph: {
+    title: "AutoIntel",
+    description: "See the MOT history and likely fault patterns for any UK car — before you hand over your money.",
+    images: [{ url: "/icon.png", width: 585, height: 585 }],
+    siteName: "AutoIntel",
+  },
+  twitter: {
+    card: "summary",
+    title: "AutoIntel",
+    description: "See the MOT history and likely fault patterns for any UK car — before you hand over your money.",
+    images: ["/icon.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
