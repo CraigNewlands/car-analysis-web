@@ -32,19 +32,19 @@ export default function Home() {
           value={vrm}
           onChange={(e) => setVrm(e.target.value)}
           placeholder="e.g. AB12 CDE"
-          className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-center text-lg font-mono uppercase tracking-widest placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
+          className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-center text-lg font-mono uppercase tracking-widest text-white placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
           maxLength={8}
           autoFocus
         />
         <div className="relative">
-          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">£</span>
+          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">£</span>
           <input
             type="text"
             inputMode="numeric"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="Asking price (optional)"
-            className="w-full rounded-lg border border-gray-700 bg-gray-900 pl-8 pr-4 py-3 text-gray-200 placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
+            className="w-full rounded-lg border border-gray-700 bg-gray-900 pl-8 pr-4 py-3 text-lg text-white placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
           />
         </div>
         <button
