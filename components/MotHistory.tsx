@@ -60,14 +60,16 @@ function MileageChart({ tests, avgMileage, firstUsedDate }: { tests: MotTest[]; 
     })
     .join(" ");
 
-  // Diagonal projection line: from (firstUsedDate, 0) to (today, avgMileage)
+  // Diagonal projection line: linear from (firstUsedDate, 0) to (today, avgMileage)
+  // Clipped to the visible x range (MOT history may start after first use date)
   const firstUseT = new Date(firstUsedDate).getTime();
   const todayT = Date.now();
-  const avgLine = avgMileage !== null && firstUseT >= minT ? {
-    x1: xFromTime(Math.max(firstUseT, minT)),
-    y1: y(firstUseT >= minT ? 0 : avgMileage * (minT - firstUseT) / (todayT - firstUseT)),
-    x2: xFromTime(Math.min(todayT, maxT)),
-    y2: y(avgMileage * (Math.min(todayT, maxT) - firstUseT) / (todayT - firstUseT)),
+  const mileageAtT = (t: number) => avgMileage! * (t - firstUseT) / (todayT - firstUseT);
+  const avgLine = avgMileage !== null && todayT > firstUseT ? {
+    x1: xFromTime(minT),
+    y1: y(mileageAtT(minT)),
+    x2: xFromTime(maxT),
+    y2: y(mileageAtT(maxT)),
   } : null;
 
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map((frac) => ({
