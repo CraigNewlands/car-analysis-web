@@ -19,7 +19,7 @@ interface DateGroup {
   tests: TestPoint[];   // all tests on this date (could be fail + pass)
 }
 
-function MileageChart({ tests, avgMileage }: { tests: MotTest[]; avgMileage: number | null }) {
+function MileageChart({ tests, avgMileage, firstUsedDate }: { tests: MotTest[]; avgMileage: number | null; firstUsedDate: string }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [activeGroup, setActiveGroup] = useState<DateGroup | null>(null);
 
@@ -39,7 +39,8 @@ function MileageChart({ tests, avgMileage }: { tests: MotTest[]; avgMileage: num
   const minT = dates[0];
   const maxT = dates[dates.length - 1];
   const xFromTime = (t: number) => PAD.left + ((t - minT) / (maxT - minT)) * innerW;
-  const y = (m: number) => PAD.top + innerH - (m / maxM) * innerH;
+  const effectiveMax = Math.max(maxM, avgMileage ?? 0);
+  const y = (m: number) => PAD.top + innerH - (m / effectiveMax) * innerH;
 
   // Group by date — use the highest mileage of the group for the line
   const groupMap = new Map<string, DateGroup>();
@@ -59,8 +60,15 @@ function MileageChart({ tests, avgMileage }: { tests: MotTest[]; avgMileage: num
     })
     .join(" ");
 
-  // Horizontal reference line at average mileage for similar cars at this age
-  const avgY = avgMileage !== null && avgMileage <= maxM ? y(avgMileage) : null;
+  // Diagonal projection line: from (firstUsedDate, 0) to (today, avgMileage)
+  const firstUseT = new Date(firstUsedDate).getTime();
+  const todayT = Date.now();
+  const avgLine = avgMileage !== null && firstUseT >= minT ? {
+    x1: xFromTime(Math.max(firstUseT, minT)),
+    y1: y(firstUseT >= minT ? 0 : avgMileage * (minT - firstUseT) / (todayT - firstUseT)),
+    x2: xFromTime(Math.min(todayT, maxT)),
+    y2: y(avgMileage * (Math.min(todayT, maxT) - firstUseT) / (todayT - firstUseT)),
+  } : null;
 
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map((frac) => ({
     label: Math.round(maxM * frac) >= 1000 ? `${Math.round(maxM * frac / 1000)}k` : String(Math.round(maxM * frac)),
@@ -85,7 +93,7 @@ function MileageChart({ tests, avgMileage }: { tests: MotTest[]; avgMileage: num
     <div className="mb-6">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs text-gray-500 uppercase tracking-wide">Mileage over time</p>
-        {avgY !== null && (
+        {avgLine && (
           <p className="text-xs text-gray-500 flex items-center gap-1.5">
             <svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#6b7280" strokeWidth="1.5" strokeDasharray="4 3" /></svg>
             Avg for similar cars ({(avgMileage! / 1000).toFixed(0)}k mi)
@@ -118,9 +126,9 @@ function MileageChart({ tests, avgMileage }: { tests: MotTest[]; avgMileage: num
             />
           )}
 
-          {/* Average mileage reference line */}
-          {avgY !== null && (
-            <line x1={PAD.left} x2={W - PAD.right} y1={avgY} y2={avgY} stroke="#6b7280" strokeWidth={1.5} strokeDasharray="4 3" opacity={0.6} />
+          {/* Average mileage projection line */}
+          {avgLine && (
+            <line x1={avgLine.x1} y1={avgLine.y1} x2={avgLine.x2} y2={avgLine.y2} stroke="#6b7280" strokeWidth={1.5} strokeDasharray="4 3" opacity={0.6} />
           )}
 
           {/* Line */}
@@ -246,7 +254,7 @@ export default function MotHistory({ report, vehicle }: { report: VehicleReport;
   const tests = vehicle.motTests;
   return (
     <Section title="MOT History — What's happened so far">
-      <MileageChart tests={tests} avgMileage={report.avg_mileage_for_age} />
+      <MileageChart tests={tests} avgMileage={report.avg_mileage_for_age} firstUsedDate={vehicle.firstUsedDate} />
       <div className="flex flex-col gap-2">
         {tests.map((t) => <MotTestRow key={t.motTestNumber} t={t} />)}
       </div>
