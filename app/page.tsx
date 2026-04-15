@@ -28,6 +28,8 @@ export default function Home() {
 
       <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-3">
         <input
+          id="vrm"
+          name="vrm"
           type="text"
           value={vrm}
           onChange={(e) => setVrm(e.target.value)}
@@ -35,16 +37,20 @@ export default function Home() {
           className="w-full rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-center text-lg font-mono uppercase tracking-widest text-white placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
           maxLength={8}
           autoFocus
+          autoComplete="off"
         />
         <div className="relative">
           <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">£</span>
           <input
+            id="asking-price"
+            name="asking-price"
             type="text"
             inputMode="numeric"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="Asking price (optional)"
             className="w-full rounded-lg border border-gray-700 bg-gray-900 pl-8 pr-4 py-3 text-lg text-white placeholder:text-gray-600 focus:border-yellow-400 focus:outline-none"
+            autoComplete="off"
           />
         </div>
         <button
