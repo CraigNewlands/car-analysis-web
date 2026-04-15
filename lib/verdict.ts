@@ -52,11 +52,6 @@ export interface Verdict {
   currentAdvisoryCount: number;
 }
 
-function mileageTests(tests: MotTest[]): number[] {
-  return tests
-    .map((t) => Number(t.odometerValue))
-    .filter((m) => !isNaN(m) && m > 0);
-}
 
 function checkMileageConsistency(tests: MotTest[]): MileageFlag {
   const sorted = [...tests]
@@ -111,56 +106,73 @@ function getRecurringAdvisories(tests: MotTest[]): RecurringAdvisory[] {
     .sort((a, b) => b.count - a.count);
 }
 
+function recentPassRate(tests: MotTest[], n = 3): number {
+  const sorted = [...tests].sort((a, b) => b.completedDate.localeCompare(a.completedDate));
+  const recent = sorted.slice(0, n);
+  if (recent.length === 0) return 1;
+  return recent.filter((t) => t.testResult === "PASSED").length / recent.length;
+}
+
 function computeRiskScore(params: {
+  tests: MotTest[];
   passRate: number;
   totalTests: number;
   mileageSuspicious: boolean;
   hasOutstandingRecall: boolean;
   dangerousDefectsOnLatest: number;
-  majorDefectsOnLatest: number;
-  peerPassRate: number | null;
+  recurringAdvisoryCount: number;
+  v5cType: V5CFlag["type"];
+  avgMileageForAge: number | null;
   mileage: number;
-  firstUsedDate: string;
+  motExpiryDays: number | null;
 }): RiskScore {
   const {
-    passRate, totalTests, mileageSuspicious, hasOutstandingRecall,
-    dangerousDefectsOnLatest, majorDefectsOnLatest, peerPassRate,
-    mileage, firstUsedDate,
+    tests, passRate, totalTests, mileageSuspicious, hasOutstandingRecall,
+    dangerousDefectsOnLatest, recurringAdvisoryCount, v5cType,
+    avgMileageForAge, mileage, motExpiryDays,
   } = params;
 
-  let score = 0;
+  let penalty = 0;
 
-  // Pass rate (0–40 points) — most signal
-  score += (1 - passRate) * 40;
+  // 1. Recent pass rate — last 3 MOTs (0–30 points)
+  //    Weighted more heavily than full history: current condition matters most
+  const recentRate = recentPassRate(tests, 3);
+  penalty += (1 - recentRate) * 30;
 
-  // Dangerous defects on latest MOT (0–20 points)
-  score += Math.min(dangerousDefectsOnLatest * 10, 20);
-
-  // Major defects on latest MOT (0–10 points)
-  score += Math.min(majorDefectsOnLatest * 5, 10);
-
-  // Mileage relative to age (0–15 points)
-  const ageYears = (Date.now() - new Date(firstUsedDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-  if (ageYears > 0) {
-    const annualMileage = mileage / ageYears;
-    // Average UK annual mileage ~7,400 mi. High mileage = more wear.
-    if (annualMileage > 15000) score += 15;
-    else if (annualMileage > 10000) score += 8;
-    else if (annualMileage > 7000) score += 3;
+  // 2. Full history pass rate (0–15 points)
+  if (totalTests >= 3) {
+    penalty += (1 - passRate) * 15;
   }
 
-  // Peer comparison (0–10 points) — worse than peers = more risk
-  if (peerPassRate !== null && totalTests >= 3) {
-    const peerDiff = peerPassRate / 100 - passRate;
-    if (peerDiff > 0.2) score += 10;
-    else if (peerDiff > 0.1) score += 5;
+  // 3. Mileage vs model peers (0–15 points)
+  //    Use avg_mileage_for_age from the API if available, else skip
+  if (avgMileageForAge !== null && avgMileageForAge > 0) {
+    const ratio = mileage / avgMileageForAge;
+    if (ratio > 1.5) penalty += 15;
+    else if (ratio > 1.25) penalty += 10;
+    else if (ratio > 1.1) penalty += 5;
+    else if (ratio < 0.6) penalty += 3; // suspiciously low mileage
   }
 
-  // Hard penalties
-  if (mileageSuspicious) score += 20;
-  if (hasOutstandingRecall) score += 15;
+  // 4. Dangerous defects on latest MOT (0–15 points)
+  penalty += Math.min(dangerousDefectsOnLatest * 7, 15);
 
-  const riskClamped = Math.min(Math.round(score), 100);
+  // 5. Recurring unresolved advisories (0–10 points)
+  penalty += Math.min(recurringAdvisoryCount * 3, 10);
+
+  // 6. V5C signals (0–10 points)
+  if (v5cType === "change_after_failure") penalty += 10;
+  else if (v5cType === "recent_change") penalty += 5;
+
+  // 7. MOT expiry (0–5 points)
+  if (motExpiryDays !== null && motExpiryDays < 30) penalty += 5;
+  else if (motExpiryDays !== null && motExpiryDays < 60) penalty += 2;
+
+  // 8. Hard penalties — can override everything
+  if (hasOutstandingRecall) penalty += 10;
+  if (mileageSuspicious) penalty += 20;
+
+  const riskClamped = Math.min(Math.round(penalty), 100);
   const clamped = 100 - riskClamped;
 
   return {
@@ -247,8 +259,7 @@ export function computeVerdict(vehicle: VehicleDetail, report: VehicleReport): V
   const sortedTests = [...tests].sort((a, b) => a.completedDate.localeCompare(b.completedDate));
   const latestTest = sortedTests[sortedTests.length - 1];
   const dangerousDefectsOnLatest = latestTest ? latestTest.defects.filter((d) => d.dangerous).length : 0;
-  const majorDefectsOnLatest = latestTest ? latestTest.defects.filter((d) => !d.dangerous && d.type === "FAIL").length : 0;
-  const currentAdvisories = latestTest
+const currentAdvisories = latestTest
     ? latestTest.defects.filter((d) => d.type === "ADVISORY").map((d) => d.text)
     : [];
 
@@ -256,15 +267,17 @@ export function computeVerdict(vehicle: VehicleDetail, report: VehicleReport): V
   const upcomingRisks = currentAdvisories.slice(0, 7);
 
   const riskScore = computeRiskScore({
+    tests,
     passRate,
     totalTests,
     mileageSuspicious: mileageFlag.suspicious,
     hasOutstandingRecall,
     dangerousDefectsOnLatest,
-    majorDefectsOnLatest,
-    peerPassRate: report.peer_analysis.pass_rate,
+    recurringAdvisoryCount: recurringAdvisories.length,
+    v5cType: v5cFlag.type,
+    avgMileageForAge: report.avg_mileage_for_age,
     mileage: report.mileage,
-    firstUsedDate: vehicle.firstUsedDate,
+    motExpiryDays: expiryDays,
   });
 
   // Summary sentence driven by risk score
